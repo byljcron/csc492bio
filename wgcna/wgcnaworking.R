@@ -39,10 +39,33 @@ plot(sft$fitIndices[,1], sft$fitIndices[,5],xlab="Soft Threshold (power)",ylab="
 text(sft$fitIndices[,1], sft$fitIndices[,5], labels=powers, cex=cex1,col="red")
 
 browseURL("tmp.png") 
+n=5
+  while ( TRUE ) 
+  {
+    filepath="powerncut.txt"
+    con = file(filepath, "r")
 
-cat("Enter an integer for power:  ")
-n <- scan("stdin", 0,  n=1, quiet = TRUE)
-n=as.numeric(n)
+    Sys.sleep(0.1)
+    line = readLines(con, n = 1)
+    if ( length(line) == 0 ) {
+      break
+    }
+    if( line == "yes")
+    {
+        line = readLines(con, n = 1)
+        n=as.numeric(line)
+        line = readLines(con, n = 1)
+        if (length(line)!=0)cutoff=as.numeric(line)
+        else cutoff=0.7
+        close(con)
+        break   
+    }
+    else if(line=="no")
+        close(con)
+      
+  }
+
+
 
 file.remove("tmp.png")
 # in this example, power = 5 is picked up
