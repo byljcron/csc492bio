@@ -2,24 +2,34 @@ cd wgcna
 Rscript wgcnaworking.R
 cd ..
 n=1
-cat begin.html>result.html
-while read a b c
+#cat begin.html>result.html
+echo "[">data.json
+while read node b color
 do
     if (( n == 1 ))
     then
         n=0
         continue
     fi
-    echo "{data: {id:'"$a"',type : '"$c"'} },">>result.html
+    echo '{"data": {"id":"'$node'","type" : "'$color'"} },'>>data.json
+    #echo "{data: {id:'"$node"',type : '"$color"'} },">>result.html
 done < wgcna/CytoscapeInput-nodes-testData_threshold.05.txt
 n=1
-while read a b c d e f
+while read nodefrom nodeto weight e f
 do
     if (( n == 1 ))
     then
         n=0
         continue
     fi
-    echo "{data: {id:'"$a$b"',source : '"$a"',target:'"$b"'} },">>result.html
+    #echo "{data: {id:'"$nodefrom$nodeto"',source : '"$nodefrom"',target:'"$nodeto"','weight':"$weight"} },">>result.html
+    echo '{"data": {"id":"'$nodefrom$nodeto'","source" : "'$nodefrom'","target":"'$nodeto'","weight":'$weight'} },'>>data.json
 done < wgcna/CytoscapeInput-edges-testData_threshold.05.txt
-cat end.html >> result.html
+sed -i '$ s/.$//' data.json
+echo "]">>data.json
+#echo "]});">>result.html
+#while read node shapeset
+#do
+#    echo "cy.getElementById('$node').data'set','$shapeset');">>result.html
+#done < shape.txt
+#cat end.html >> result.html
