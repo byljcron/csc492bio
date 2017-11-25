@@ -1,7 +1,7 @@
 # you have to change work directory to your own
 #setwd("/Users/ezeng/Documents/Research/Stuart_Jones/Environmental")
 args <- commandArgs(trailingOnly = TRUE)
-path = arg[1]
+path = args[1]
 # load WGANA library
 library(WGCNA)
 options(stringsAsFactors = FALSE)
@@ -30,7 +30,7 @@ sft = pickSoftThreshold(datExpr, powerVector = powers, verbose = 5)
 sizeGrWindow(9, 5)
 par(mfrow = c(1,2));
 cex1 = 0.9;
-png(path+"tmp.png") 
+png(paste(path,"/tmp.png",sep="")) 
 plot(sft$fitIndices[,1], -sign(sft$fitIndices[,3])*sft$fitIndices[,2],xlab="Soft Threshold (power)",ylab="Scale Free Topology Model Fit,signed R^2",type="n",main = paste("Scale independence"))
 text(sft$fitIndices[,1], -sign(sft$fitIndices[,3])*sft$fitIndices[,2],labels=powers,cex=cex1,col="red")
 
@@ -39,14 +39,14 @@ dev.off()
 plot(sft$fitIndices[,1], sft$fitIndices[,5],xlab="Soft Threshold (power)",ylab="Mean Connectivity", type="n",main = paste("Mean connectivity"))
 text(sft$fitIndices[,1], sft$fitIndices[,5], labels=powers, cex=cex1,col="red")
 
-browseURL(path+"tmp.png") 
+browseURL(paste(path,"/tmp.png",sep="")) 
 n=5
   while ( TRUE ) 
   {
-    filepath=path+"powerncut.txt"
+    Sys.sleep(1)
+    filepath=paste(path,"/powerncut.txt",sep="")
     con = file(filepath, "r")
 
-    Sys.sleep(0.1)
     line = readLines(con, n = 1)
     if ( length(line) == 0 ) {
       break
@@ -69,7 +69,7 @@ n=5
 
 
 
-file.remove(path+"tmp.png")
+file.remove(paste(path,"/tmp.png",sep=""))
 # in this example, power = 5 is picked up
 net = blockwiseModules(datExpr, power = n, minModuleSize = 10, reassignThreshold = 0, mergeCutHeight = 0.25,numericLabels = TRUE, pamRespectsDendro = FALSE, saveTOMs = TRUE, saveTOMFileBase = "SigGene_averageTechRep_Temp_qvalue_005", verbose = 3)
 TOM <- TOMsimilarityFromExpr(datExpr, power = n)
@@ -89,7 +89,7 @@ plotTOM = dissTOM^n
 diag(plotTOM) = NA
 
 # save the heat map 
-jpeg(path+"Module_of_3_Environs.jpg")
+jpeg(paste(path,"/Module_of_3_Environs.jpg",sep=""))
 TOMplot(plotTOM, geneTree, moduleColors, main = "Network heatmap plot, Test_data")
 dev.off()
 
@@ -104,5 +104,5 @@ table(moduleColors)
 # save network files. Please send me all these Cytoscape input files once you finished
 # we are saving two files module file and edge file
 
-cyt = exportNetworkToCytoscape(TOM, edgeFile = paste(path+"CytoscapeInput-edges-testData_threshold.out", ".txt", sep=""), nodeFile = paste(path+"CytoscapeInput-nodes-testData_threshold.out", ".txt", sep=""), weighted = TRUE, threshold = cutoff^n,nodeNames = colnames(datExpr), nodeAttr = moduleColors)
+cyt = exportNetworkToCytoscape(TOM, edgeFile = paste(paste(path,"/CytoscapeInput-edges-testData_threshold.out",sep=""), ".txt", sep=""), nodeFile = paste(paste(path,"/CytoscapeInput-nodes-testData_threshold.out",sep=""), ".txt", sep=""), weighted = TRUE, threshold = cutoff^n,nodeNames = colnames(datExpr), nodeAttr = moduleColors)
 
