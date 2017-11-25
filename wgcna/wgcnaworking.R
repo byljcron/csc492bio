@@ -1,6 +1,7 @@
 # you have to change work directory to your own
 #setwd("/Users/ezeng/Documents/Research/Stuart_Jones/Environmental")
-
+args <- commandArgs(trailingOnly = TRUE)
+path = arg[1]
 # load WGANA library
 library(WGCNA)
 options(stringsAsFactors = FALSE)
@@ -29,7 +30,7 @@ sft = pickSoftThreshold(datExpr, powerVector = powers, verbose = 5)
 sizeGrWindow(9, 5)
 par(mfrow = c(1,2));
 cex1 = 0.9;
-png("tmp.png") 
+png(path+"tmp.png") 
 plot(sft$fitIndices[,1], -sign(sft$fitIndices[,3])*sft$fitIndices[,2],xlab="Soft Threshold (power)",ylab="Scale Free Topology Model Fit,signed R^2",type="n",main = paste("Scale independence"))
 text(sft$fitIndices[,1], -sign(sft$fitIndices[,3])*sft$fitIndices[,2],labels=powers,cex=cex1,col="red")
 
@@ -38,11 +39,11 @@ dev.off()
 plot(sft$fitIndices[,1], sft$fitIndices[,5],xlab="Soft Threshold (power)",ylab="Mean Connectivity", type="n",main = paste("Mean connectivity"))
 text(sft$fitIndices[,1], sft$fitIndices[,5], labels=powers, cex=cex1,col="red")
 
-browseURL("tmp.png") 
+browseURL(path+"tmp.png") 
 n=5
   while ( TRUE ) 
   {
-    filepath="powerncut.txt"
+    filepath=path+"powerncut.txt"
     con = file(filepath, "r")
 
     Sys.sleep(0.1)
@@ -53,7 +54,8 @@ n=5
     if( line == "yes")
     {
         line = readLines(con, n = 1)
-        n=as.numeric(line)
+        if (length(line!=0))n=as.numeric(line)
+        else n=1
         line = readLines(con, n = 1)
         if (length(line)!=0)cutoff=as.numeric(line)
         else cutoff=0.7
@@ -67,27 +69,27 @@ n=5
 
 
 
-file.remove("tmp.png")
+file.remove(path+"tmp.png")
 # in this example, power = 5 is picked up
 net = blockwiseModules(datExpr, power = n, minModuleSize = 10, reassignThreshold = 0, mergeCutHeight = 0.25,numericLabels = TRUE, pamRespectsDendro = FALSE, saveTOMs = TRUE, saveTOMFileBase = "SigGene_averageTechRep_Temp_qvalue_005", verbose = 3)
-TOM <- TOMsimilarityFromExpr(datExpr, power = 5)
+TOM <- TOMsimilarityFromExpr(datExpr, power = n)
 
 sizeGrWindow(12, 9)
 mergedColors = labels2colors(net$colors)
 plotDendroAndColors(net$dendrograms[[1]], mergedColors[net$blockGenes[[1]]], "Module colors",dendroLabels = FALSE, hang = 0.03, addGuide = TRUE, guideHang = 0.05)
 
 # note that power = 5, change it accordingly based on your data  
-dissTOM = 1-TOMsimilarityFromExpr(datExpr, power = 5)
+dissTOM = 1-TOMsimilarityFromExpr(datExpr, power = n)
 moduleLabels = net$colors
 moduleColors = labels2colors(net$colors)
 MEs = net$MEs; geneTree = net$dendrograms[[1]]
 
 # 5 is power
-plotTOM = dissTOM^5
+plotTOM = dissTOM^n
 diag(plotTOM) = NA
 
 # save the heat map 
-jpeg("Module_of_3_Environs.jpg")
+jpeg(path+"Module_of_3_Environs.jpg")
 TOMplot(plotTOM, geneTree, moduleColors, main = "Network heatmap plot, Test_data")
 dev.off()
 
@@ -101,7 +103,6 @@ table(moduleColors)
 
 # save network files. Please send me all these Cytoscape input files once you finished
 # we are saving two files module file and edge file
-cyt = exportNetworkToCytoscape(TOM, edgeFile = paste("CytoscapeInput-edges-testData_threshold.09", ".txt", sep=""), nodeFile = paste("CytoscapeInput-nodes-testData_threshold.09", ".txt", sep=""), weighted = TRUE, threshold = 0.09,nodeNames = colnames(datExpr), nodeAttr = moduleColors)
-cyt = exportNetworkToCytoscape(TOM, edgeFile = paste("CytoscapeInput-edges-testData_threshold.05", ".txt", sep=""), nodeFile = paste("CytoscapeInput-nodes-testData_threshold.05", ".txt", sep=""), weighted = TRUE, threshold = 0.05,nodeNames = colnames(datExpr), nodeAttr = moduleColors)
-cyt = exportNetworkToCytoscape(TOM, edgeFile = paste("CytoscapeInput-edges-testData_threshold.07", ".txt", sep=""), nodeFile = paste("CytoscapeInput-nodes-testData_threshold.07", ".txt", sep=""), weighted = TRUE, threshold = 0.07,nodeNames = colnames(datExpr), nodeAttr = moduleColors)
+
+cyt = exportNetworkToCytoscape(TOM, edgeFile = paste(path+"CytoscapeInput-edges-testData_threshold.out", ".txt", sep=""), nodeFile = paste(path+"CytoscapeInput-nodes-testData_threshold.out", ".txt", sep=""), weighted = TRUE, threshold = cutoff^n,nodeNames = colnames(datExpr), nodeAttr = moduleColors)
 

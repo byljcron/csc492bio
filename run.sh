@@ -13,7 +13,7 @@ do
     fi
     echo '{"data": {"id":"'$node'","type" : "'$color'"} },'>>data.json
     #echo "{data: {id:'"$node"',type : '"$color"'} },">>result.html
-done < wgcna/CytoscapeInput-nodes-testData_threshold.05.txt
+done < wgcna/CytoscapeInput-nodes-testData_threshold.out.txt
 n=1
 while read nodefrom nodeto weight e f
 do
@@ -24,7 +24,7 @@ do
     fi
     #echo "{data: {id:'"$nodefrom$nodeto"',source : '"$nodefrom"',target:'"$nodeto"','weight':"$weight"} },">>result.html
     echo '{"data": {"id":"'$nodefrom$nodeto'","source" : "'$nodefrom'","target":"'$nodeto'","weight":'$weight'} },'>>data.json
-done < wgcna/CytoscapeInput-edges-testData_threshold.05.txt
+done < wgcna/CytoscapeInput-edges-testData_threshold.out.txt
 sed -i '$ s/.$//' data.json
 echo "]">>data.json
 #echo "]});">>result.html
